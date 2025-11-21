@@ -1,0 +1,40 @@
+name: Build and Cache
+on:
+  push:
+    branches:
+      - main
+      - update_upterm
+jobs:
+  build:
+    strategy:
+      matrix:
+        system:
+          - x86_64-linux
+          - aarch64-linux
+          - x86_64-darwin
+          - aarch64-darwin
+    runs-on: ${{ contains(matrix.system, 'darwin') && 'macos-latest' || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          repository: b-rodrigues/nixpkgs
+          ref: update_upterm
+      
+      - uses: cachix/install-nix-action@v31
+      
+      - uses: cachix/cachix-action@v15
+        with:
+          name: rstats-on-nix
+          authToken: '${{ secrets.CACHIX_AUTH }}'
+      
+      # Build and push go
+      - name: Build and push go to Cachix
+        run: |
+          nix build .#go --print-build-logs
+          cachix push rstats-on-nix $(readlink -f result)
+      
+      # Build and push upterm
+      - name: Build and push upterm to Cachix
+        run: |
+          nix build .#upterm --print-build-logs
+          cachix push rstats-on-nix $(readlink -f result)
