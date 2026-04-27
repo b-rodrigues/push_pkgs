@@ -27,14 +27,10 @@ jobs:
           name: rstats-on-nix
           authToken: '${{ secrets.CACHIX_AUTH }}'
       
-      # Build and push go
+      # Build and push R
       - name: Build and push go to Cachix
         run: |
-          nix build .#go --print-build-logs
+          nix-shell -I nixpkgs=https://github.com/rstats-on-nix/nixpkgs/archive/refs/heads/update_r_460.tar.gz -p R
           cachix push rstats-on-nix $(readlink -f result)
       
-      # Build and push upterm
-      - name: Build and push upterm to Cachix
-        run: |
-          nix build .#upterm --print-build-logs
-          cachix push rstats-on-nix $(readlink -f result)
+
