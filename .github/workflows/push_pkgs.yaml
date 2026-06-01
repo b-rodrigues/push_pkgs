@@ -27,9 +27,16 @@ jobs:
           authToken: '${{ secrets.CACHIX_AUTH }}'
       
       # Build and push R
-      - name: Build and push go to Cachix
-        run: |
-          nix-shell -I nixpkgs=https://github.com/rstats-on-nix/nixpkgs/archive/refs/heads/update_r_460.tar.gz -p R
-          cachix push rstats-on-nix $(readlink -f result)
-      
+     # - name: Build and push go to Cachix
+     #   run: |
+    #      nix-shell -I nixpkgs=https://github.com/rstats-on-nix/nixpkgs/archive/refs/heads/update_r_460.tar.gz -p R
+    #      cachix push rstats-on-nix $(readlink -f result)
 
+      - name: Enter nix-shell with positron-bin
+        env:
+          NIXPKGS_ALLOW_UNFREE: "1"
+        run: |
+          nix-shell \
+            -I nixpkgs=https://github.com/NixOS/nixpkgs/archive/6e7fa08c8e30e71af58e32d749b800be47041485.tar.gz \
+            -p positron-bin \
+            --run 'which positron'
